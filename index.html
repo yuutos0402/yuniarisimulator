@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Union Arena Simulator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="game-board">
+  <div class="top-row">
+    <div class="side-column">
+      <div class="label">LIFE</div>
+      <div id="life-stack"></div>
+    </div>
+
+    <div class="center-field">
+      <div class="line-group">
+        <div class="line-label">FRONT LINE</div>
+        <div id="front-line" class="grid-4">
+          <div class="slot" onclick="placeCard(this)"></div>
+          <div class="slot" onclick="placeCard(this)"></div>
+          <div class="slot" onclick="placeCard(this)"></div>
+          <div class="slot" onclick="placeCard(this)"></div>
+        </div>
+      </div>
+      <div class="line-group">
+        <div class="line-label">ENERGY LINE</div>
+        <div id="energy-line" class="grid-4">
+          <div class="slot" onclick="placeCard(this)"></div>
+          <div class="slot" onclick="placeCard(this)"></div>
+          <div class="slot" onclick="placeCard(this)"></div>
+          <div class="slot" onclick="placeCard(this)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-column">
+      <div class="label">DECK</div>
+      <div class="deck-visual" onclick="drawCard()">
+        <span id="deck-count">0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="middle-row">
+    <div class="mini-box">REMOVE</div>
+    <div id="ap-area">
+      <div class="ap-card" onclick="toggleAP(0)"></div>
+      <div class="ap-card" onclick="toggleAP(1)"></div>
+      <div class="ap-card" onclick="toggleAP(2)"></div>
+    </div>
+    <div class="mini-box">OUTSIDE</div>
+  </div>
+</div>
+
+<div id="hand-fixed">
+  <div id="hand"></div>
+  <div class="controls">
+    <button onclick="startGame()">開始</button>
+    <button id="mulligan-btn" onclick="mulligan()" style="display:none;">マリガン</button>
+    <button onclick="nextTurn()">終了</button>
+    <button onclick="location.href='deckbuilder.html'">編集</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

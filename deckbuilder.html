@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Deck Builder</title>
+  <style>
+    :root {
+      --accent: #00e5ff;
+      --bg: #111;
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --card-gap: 5px; 
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: sans-serif;
+      background: var(--bg);
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding-bottom: 20px; /* 下部の余白を少し詰める */
+      overflow-x: hidden;
+    }
+
+    /* タイトル周りをコンパクトに */
+    h1 { font-size: 1.1rem; margin: 8px 0; }
+    #deckCount { font-size: 18px; font-weight: bold; color: var(--accent); margin: 2px; }
+
+    /* 【修正】デッキエリア：3段目(15枚分)がスクロールなしで見える高さに設定 */
+    #deck {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: var(--card-gap);
+      margin: 5px 10px;
+      /* 3段分を表示するために高さを拡張 */
+      min-height: 255px; 
+      background: var(--card-bg);
+      padding: 10px 5px; 
+      border-radius: 12px;
+      border: 1px solid #333;
+    }
+
+    .card-wrapper {
+      position: relative;
+      width: calc((100% - (var(--card-gap) * 4)) / 5);
+      aspect-ratio: 2.5 / 3.5;
+    }
+
+    .deckcard {
+      width: 100%;
+      height: 100%;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: opacity 0.1s;
+      object-fit: contain; 
+      display: block;
+      background: #000;
+    }
+
+    .deckcard:active { opacity: 0.6; }
+
+    .count-badge {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      background: var(--accent);
+      color: #000;
+      font-weight: bold;
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 6px;
+      border: 1.5px solid #111;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* ボタン類：高さを節約 */
+    .btn-group { margin: 8px 0; display: flex; justify-content: center; gap: 5px; }
+    button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #333;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+    }
+    .btn-primary { background: #2a6aad; }
+    .btn-success { background: #2a7a3a; }
+    .btn-danger { background: #8b2222; }
+
+    /* 保存済みデッキ：リストの行を低くして場所を確保 */
+    #savedDecksSection { margin: 5px 10px; text-align: left; }
+    #savedDecksSection h3 { font-size: 14px; margin: 5px 0; }
+    #savedDecksList { list-style: none; padding: 0; max-height: 80px; overflow-y: auto; }
+    #savedDecksList li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1e1e1e;
+      padding: 6px 10px;
+      margin-bottom: 4px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      font-size: 12px;
+    }
+
+    hr { border: 0.5px solid #333; margin: 10px 0; }
+
+    /* 検索入力 */
+    #searchBox {
+      padding: 10px;
+      margin: 5px;
+      width: 90%;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #222;
+      color: white;
+      font-size: 15px;
+    }
+
+    /* 下のカードリスト：こちらはスクロール前提 */
+    #cardList {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: var(--card-gap);
+      margin: 10px;
+      padding: 0 5px 100px 5px;
+    }
+
+    .card {
+      width: calc((100% - (var(--card-gap) * 4)) / 5);
+      aspect-ratio: 2.5 / 3.5;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: opacity 0.1s;
+      object-fit: contain;
+      background: #000;
+    }
+    .card:active { opacity: 0.6; }
+
+    /* モーダル */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    #modal-overlay.active { display: flex; }
+    #modal { background: #222; border: 1px solid #444; border-radius: 12px; padding: 20px; width: 85%; }
+    #deckNameInput { padding: 10px; width: 100%; margin-bottom: 15px; border-radius: 6px; border: 1px solid #555; background: #333; color: white; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <h1>Deck Builder</h1>
+  <div id="deckCount">0 / 50</div>
+
+  <div id="deck"></div>
+
+  <div class="btn-group">
+    <button class="btn-primary" onclick="openSaveModal()">保存</button>
+    <button onclick="clearDeck()">クリア</button>
+    <button onclick="location.href='index.html'">戻る</button>
+  </div>
+
+  <div id="savedDecksSection">
+    <h3>保存済みデッキ</h3>
+    <ul id="savedDecksList"></ul>
+  </div>
+
+  <hr>
+
+  <input id="searchBox" type="text" placeholder="カード名で検索..." oninput="showCards()">
+
+  <div style="margin-bottom:10px;">
+    <button onclick="setCategory('all')">すべて</button>
+    <button onclick="setCategory('soloLeveling')">俺レベ</button>
+  </div>
+
+  <div id="cardList"></div>
+
+  <div id="modal-overlay">
+    <div id="modal">
+      <h3>デッキ名を入力</h3>
+      <input id="deckNameInput" type="text" placeholder="デッキ名" maxlength="20">
+      <div class="btn-group">
+        <button class="btn-success" onclick="confirmSave()">保存</button>
+        <button onclick="closeModal()">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="deckbuilder.js"></script>
+</body>
+</html>

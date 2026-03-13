@@ -1,0 +1,104 @@
+[
+ {
+  "id":"SLG030",
+  "name":"影の軍団",
+  "bp":1500,
+  "type":"character",
+  "category":"soloLeveling",
+  "maxCount":12,
+"image":"images/soloLeveling/0shadow.png"
+ },
+ {
+  "id":"SLG022",
+  "name":"水篠旬",
+  "bp":5000,
+  "type":"character",
+  "category":"soloLeveling",
+"image":"images/soloLeveling/12sung.png"
+ },
+ {
+  "id":"SLG017",
+  "name":"水篠旬",
+  "bp":2000,
+  "type":"character",
+  "category":"soloLeveling",
+"image":"images/soloLeveling/2sung.png"
+ },
+ {
+    "id":"SLG019",
+    "name":"水篠旬",
+    "bp":1500,
+    "type":"character",
+    "category":"soloLeveling",
+"image":"images/soloLeveling/1sung.png"
+ },
+ {
+    "id":"SLG018",
+    "name":"水篠旬",
+    "bp":3500,
+    "type":"character",
+    "category":"soloLeveling",
+"image":"images/soloLeveling/3sung.png"
+ },
+  {
+    "id":"SLG021",
+    "name":"水篠旬",
+    "bp":4000,
+    "type":"character",
+    "category":"soloLeveling",
+"image":"images/soloLeveling/5sung.png"
+  },
+ {
+    "id":"SLG028",  
+    "name":"イグリット",
+    "bp":4000,
+    "type":"character",
+    "category":"soloLeveling",
+"image":"images/soloLeveling/4igris.png"
+   },
+  {
+    "id":"SLG029",  
+    "name":"カイセル",
+    "bp":2500,
+    "type":"character",
+    "category":"soloLeveling",
+"image":"images/soloLeveling/3kaisel.png"
+   },
+  {
+    "id":"SLG031",  
+    "name":"キバ",
+    "bp":2500,
+    "type":"character",
+    "category":"soloLeveling",
+"image":"images/soloLeveling/3tusk.png"
+   },
+  {
+    "id":"SLG033",  
+    "name":"ベル",
+    "bp":4000,
+    "type":"character",
+    "category":"soloLeveling",
+"image":"images/soloLeveling/5beru.png"
+   },
+  {
+    "id":"SLG035",  
+    "name":"君主の領域",
+    "type":"field",
+    "category":"soloLeveling",
+"image":"images/soloLeveling/domain.png"
+   },
+  {
+      "id":"SLG039",  
+      "name":"影の行進",
+      "type":"event",
+      "category":"soloLeveling",
+"image":"images/soloLeveling/monarch.png"
+  },
+  {
+    "id":"SLG038",  
+    "name":"起きろ",
+    "type":"event",
+    "category":"soloLeveling",
+  "image":"images/soloLeveling/arise.png"
+  }
+]
