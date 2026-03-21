@@ -135,7 +135,8 @@ button {
   border-radius: 4px;
   flex: 1; margin: 0 2px;
   box-shadow: 0 3px 0 #000;
-  white-space: nowrap; /* 文字の折り返しを防止 */
+  white-space: nowrap; 
+  }/* 文字の折り返しを防止 */
 /* style.css に追加 */
 #outside-area {
   cursor: pointer;
@@ -147,6 +148,3 @@ button {
   background: rgba(255, 255, 255, 0.1);
   color: #eee;
 }
-
-}
-
