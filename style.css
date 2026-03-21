@@ -1,3 +1,8 @@
+/* すべての要素でダブルタップズームを禁止する */
+* {
+  touch-action: manipulation;
+}
+
 :root {
   --bg: #0a0a0a;
   --accent: #00e5ff;
