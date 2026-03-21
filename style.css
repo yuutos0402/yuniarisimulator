@@ -123,10 +123,26 @@ body {
   background: #080808;
 }
 
+/* 修正後：style.css の button 部分 */
 button {
   background: #222; color: #ccc; border: 1px solid #333;
-  padding: 12px 5px; /* 縦幅を厚くしてタップしやすく */
-  font-size: 11px; border-radius: 4px;
-  flex: 1; margin: 0 4px;
-  box-shadow: 0 4px 0 #000; /* 立体感を出して「浮いている」感じに */
+  padding: 10px 2px; /* 左右パディングを少し削る */
+  font-size: 10px;   /* 5つ並ぶので少し小さめに調整 */
+  border-radius: 4px;
+  flex: 1; margin: 0 2px;
+  box-shadow: 0 3px 0 #000;
+  white-space: nowrap; /* 文字の折り返しを防止 */
+/* style.css に追加 */
+#outside-area {
+  cursor: pointer;
+  transition: background 0.3s;
+  border: 1px solid #444;
 }
+
+#outside-area:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #eee;
+}
+
+}
+

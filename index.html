@@ -10,11 +10,13 @@
 
 <div id="game-board">
   <div class="top-row">
+    <!-- 左：ライフ -->
     <div class="side-column">
       <div class="label">LIFE</div>
       <div id="life-stack"></div>
     </div>
 
+    <!-- 中：フィールド -->
     <div class="center-field">
       <div class="line-group">
         <div class="line-label">FRONT LINE</div>
@@ -36,14 +38,18 @@
       </div>
     </div>
 
+        <!-- 右：山札 -->
     <div class="side-column">
       <div class="label">DECK</div>
-      <div class="deck-visual" onclick="drawCard()">
+      <!-- 引数を 1 にして、タップするたびに1枚ずつ確認するようにします -->
+      <div class="deck-visual" onclick="viewDeckTop(1)" style="cursor:pointer;">
         <span id="deck-count">0</span>
       </div>
     </div>
-  </div>
 
+  </div> <!-- top-row 終了 -->
+
+  <!-- 中段：AP・除外・場外 -->
   <div class="middle-row">
     <div class="mini-box">REMOVE</div>
     <div id="ap-area">
@@ -51,18 +57,48 @@
       <div class="ap-card" onclick="toggleAP(1)"></div>
       <div class="ap-card" onclick="toggleAP(2)"></div>
     </div>
-    <div class="mini-box">OUTSIDE</div>
+    <div id="outside-area" class="mini-box" onclick="moveToOutside()">OUTSIDE</div>
   </div>
-</div>
+</div> <!-- game-board 終了 -->
 
 <div id="hand-fixed">
   <div id="hand"></div>
   <div class="controls">
     <button onclick="startGame()">開始</button>
     <button id="mulligan-btn" onclick="mulligan()" style="display:none;">マリガン</button>
+    <button id="draw-btn" onclick="drawCard()" style="display:none; background: #333; color: var(--accent); font-weight: bold;">ドロー</button>
     <button onclick="nextTurn()">終了</button>
     <button onclick="location.href='deckbuilder.html'">編集</button>
   </div>
+</div>
+
+<!-- モーダル類 -->
+<div id="outside-modal" onclick="closeOutside()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; flex-direction:column; align-items:center; box-sizing:border-box; backdrop-filter: blur(4px);">
+  <div style="color:white; padding: 20px 0 10px 0; font-weight:bold; letter-spacing: 2px;">場外カード一覧</div>
+  <div id="outside-list" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; overflow-y:auto; width:90%; padding:10px;"></div>
+  <div style="color:#aaa; font-size:12px; margin-top:15px;">画面をタップして閉じる</div>
+</div>
+
+<!-- 改良版：複数枚確認・場外送り対応エリア -->
+<div id="deck-check-area" style="display:none; flex-direction:column; align-items:center; background:rgba(0,0,0,0.85); padding:10px; border-top:2px solid #00e5ff; position:fixed; bottom:160px; left:0; width:100%; z-index:900; box-sizing:border-box; backdrop-filter: blur(5px);">
+  
+  <!-- カードが横に並ぶコンテナ -->
+  <div id="check-card-list" style="display:flex; gap:8px; overflow-x:auto; width:100%; justify-content:center; padding:10px 0; min-height:110px;">
+    <!-- JSでここに<img>が追加されます -->
+  </div>
+
+  <div id="check-instruction" style="color:#00e5ff; font-size:10px; margin-bottom:8px; font-weight:bold;">カードをタップして送り先を選択</div>
+  
+  <!-- 操作ボタン：4つの選択肢 -->
+  <div id="check-controls" style="display:none; gap:6px; width:100%; justify-content:center; flex-wrap: wrap;">
+    <button onclick="processCheck('hand')" style="background:#00e5ff; color:black; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; font-size:11px;">手札へ</button>
+    <button onclick="processCheck('top')" style="background:#444; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:11px;">上に戻す</button>
+    <button onclick="processCheck('bottom')" style="background:#222; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:11px;">下へ送る</button>
+    <button onclick="processCheck('outside')" style="background:#ff4444; color:white; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; font-size:11px;">場外へ</button>
+  </div>
+
+  <!-- 全て終わらせるボタン -->
+  <button onclick="closeCheckArea()" style="margin-top:10px; background:none; border:1px solid #555; color:#888; font-size:10px; padding:2px 10px; border-radius:10px;">確認を終了（残り全て上に固定）</button>
 </div>
 
 <script src="script.js"></script>
