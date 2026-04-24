@@ -184,6 +184,14 @@
   "image": "images/sololeveling2/4kousaka.png"
 },
 {
+  "id": "SLG015",
+  "name": "水篠旬",
+  "bp": 1500,
+  "type": "character",
+  "category": "sololeveling2",
+  "image": "images/sololeveling2/0sung.png"
+},
+{
   "id": "SLG016",
   "name": "水篠旬",
   "bp": 3000,
@@ -198,6 +206,21 @@
   "type": "character",
   "category": "sololeveling2",
   "image": "images/sololeveling2/4sung.png"
+},
+{
+  "id": "SLG023",
+  "name": "水篠潤一郎",
+  "bp": 4000,
+  "type": "character",
+  "category": "sololeveling2",
+  "image": "images/sololeveling2/4jun.png"
+},
+{
+  "id": "SLG036",
+  "name": "追いつきたい",
+  "type": "event",
+  "category": "sololeveling2",
+  "image": "images/sololeveling2/oitukitai.png"
 },
 {
   "id": "SLG037",
