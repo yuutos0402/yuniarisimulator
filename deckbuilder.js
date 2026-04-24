@@ -6,11 +6,11 @@ window.onload = async () => {
   await loadCards();
   renderSavedDecksList();
   const saved = localStorage.getItem("deck");
-  if (saved) {
+  if(saved) {
     try {
       currentDeck = JSON.parse(saved);
       updateDeckDisplay();
-    } catch (e) { console.error(e); }
+    } catch(e) { console.error(e); }
   }
   showCards();
 };
@@ -19,7 +19,9 @@ async function loadCards() {
   try {
     const response = await fetch('cards.json');
     allCards = await response.json();
-  } catch (e) { console.error("JSON読み込み失敗:", e); }
+  } catch (e) {
+    console.error("JSON読み込み失敗:", e);
+  }
 }
 
 function addToDeck(card) {
@@ -27,6 +29,7 @@ function addToDeck(card) {
   const limit = card.maxCount || 4;
   const count = currentDeck.filter(c => c.id === card.id).length;
   if (count >= limit) return alert(`${card.name} は最大 ${limit} 枚までです。`);
+
   currentDeck.push({...card});
   updateDeckDisplay();
 }
@@ -43,6 +46,7 @@ function updateDeckDisplay() {
   const deckDiv = document.getElementById("deck");
   const countDiv = document.getElementById("deckCount");
   deckDiv.innerHTML = "";
+
   const uniqueIds = [...new Set(currentDeck.map(c => c.id))];
   const displayCards = uniqueIds.map(id => currentDeck.find(c => c.id === id));
 
@@ -50,12 +54,15 @@ function updateDeckDisplay() {
     const count = currentDeck.filter(c => c.id === card.id).length;
     const wrapper = document.createElement("div");
     wrapper.className = "card-wrapper";
+
     const img = document.createElement("img");
     img.src = card.image;
     img.className = "deckcard";
     img.onclick = () => removeFromDeck(card.id);
     img.onerror = () => { img.src = "https://placehold.jp/150x210.png?text=NoImage"; };
+
     wrapper.appendChild(img);
+
     if (count > 1) {
       const badge = document.createElement("div");
       badge.className = "count-badge";
@@ -71,10 +78,12 @@ function showCards() {
   const listDiv = document.getElementById("cardList");
   const searchText = document.getElementById("searchBox").value.toLowerCase();
   listDiv.innerHTML = "";
+
   const filtered = allCards.filter(c => {
     const matchesCategory = (currentCategory === 'all' || c.category === currentCategory);
     return matchesCategory && c.name.toLowerCase().includes(searchText);
   });
+
   filtered.forEach(card => {
     const img = document.createElement("img");
     img.src = card.image;
@@ -91,63 +100,38 @@ function openSaveModal() { document.getElementById("modal-overlay").classList.ad
 function closeModal() { document.getElementById("modal-overlay").classList.remove("active"); }
 
 function confirmSave() {
-  const nameInput = document.getElementById("deckNameInput");
-  const name = nameInput.value.trim() || "無題";
+  const name = document.getElementById("deckNameInput").value.trim() || "無題";
   const savedDecks = JSON.parse(localStorage.getItem("savedDecks") || "[]");
-  savedDecks.push({ name: name, cards: [...currentDeck] });
+  savedDecks.push({ name: name, cards: currentDeck });
   localStorage.setItem("savedDecks", JSON.stringify(savedDecks));
-  nameInput.value = ""; 
+  localStorage.setItem("deck", JSON.stringify(currentDeck));
   closeModal();
   renderSavedDecksList();
 }
 
-// 【重要】ここから下の書き方を変えました
 function renderSavedDecksList() {
   const list = document.getElementById("savedDecksList");
   const saved = JSON.parse(localStorage.getItem("savedDecks") || "[]");
   list.innerHTML = "";
-  
   saved.forEach((d, i) => {
     const li = document.createElement("li");
-    
-    const span = document.createElement("span");
-    span.innerText = `${d.name} (${d.cards.length})`;
-    li.appendChild(span);
-
-    const btnGroup = document.createElement("div");
-    btnGroup.style.display = "flex";
-    btnGroup.style.gap = "5px";
-
-    const loadBtn = document.createElement("button");
-    loadBtn.innerText = "使う";
-    loadBtn.onclick = () => loadSavedDeck(i); // 関数名を変更して衝突を避ける
-    btnGroup.appendChild(loadBtn);
-
-    const delBtn = document.createElement("button");
-    delBtn.innerText = "削除";
-    delBtn.className = "btn-danger";
-    delBtn.onclick = () => deleteSavedDeck(i); // 関数名を変更
-    btnGroup.appendChild(delBtn);
-
-    li.appendChild(btnGroup);
+    li.innerHTML = `<span>${d.name} (${d.cards.length})</span>
+      <div><button onclick="loadDeck(${i})">使う</button><button class="btn-danger" onclick="deleteDeck(${i})">削除</button></div>`;
     list.appendChild(li);
   });
 }
 
-function deleteSavedDeck(i) {
-  if (!confirm("このデッキを削除してもよろしいですか？")) return;
+function loadDeck(i) {
+  const saved = JSON.parse(localStorage.getItem("savedDecks") || "[]");
+  currentDeck = saved[i].cards;
+  localStorage.setItem("deck", JSON.stringify(currentDeck));
+  updateDeckDisplay();
+}
+
+function deleteDeck(i) {
+  if(!confirm("削除しますか？")) return;
   let saved = JSON.parse(localStorage.getItem("savedDecks") || "[]");
   saved.splice(i, 1);
   localStorage.setItem("savedDecks", JSON.stringify(saved));
   renderSavedDecksList();
-}
-
-function loadSavedDeck(i) {
-  const saved = JSON.parse(localStorage.getItem("savedDecks") || "[]");
-  if (saved[i]) {
-    currentDeck = [...saved[i].cards];
-    updateDeckDisplay();
-    localStorage.setItem("deck", JSON.stringify(currentDeck));
-    alert(`「${saved[i].name}」を読み込みました`);
-  }
 }

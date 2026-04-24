@@ -58,12 +58,47 @@ body {
 .line-label { font-size: 8px; color: #444; text-align: center; margin-bottom: 2px; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
 
+/* --- フィールドのスロット設定（重ねがけ対応版） --- */
 .slot {
-  aspect-ratio: var(--card-ratio); border: 1px solid #2a2a2a;
-  background: rgba(255,255,255,0.03); border-radius: 4px; overflow: hidden;
+  aspect-ratio: var(--card-ratio); 
+  border: 1px solid #2a2a2a;
+  background: rgba(255,255,255,0.03); 
+  border-radius: 4px; 
+  
+  /* 重要：子要素（カード画像）の配置基準にする */
+  position: relative; 
+  /* 重要：重ねてずらしたカードが枠外にはみ出しても見えるようにする */
+  overflow: visible; 
 }
-.slot img { width: 100%; height: 100%; object-fit: cover; }
-.slot img.rest { transform: rotate(90deg) scale(0.8); }
+
+.slot img { 
+  /* 重要：枠の左上に固定して重ねられるようにする */
+  position: absolute;
+  top: 0;
+  left: 0;
+  
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover; 
+  border-radius: 4px;
+  
+  /* 重なりの重なり順や動きをスムーズに */
+  transition: transform 0.2s, top 0.2s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+/* レスト状態：重ねた状態でも回転が見えやすいように調整 */
+.slot img.rest { 
+  /* 少し小さくして回転させることで、隣の枠との干渉を防ぐ */
+  transform: rotate(90deg) scale(0.85); 
+  z-index: 100; 
+}
+
+/* 重なった下のカードを少し暗く見せたい場合は追加（任意） */
+.slot img:not(:last-child) {
+  filter: brightness(0.7);
+}
+
 
 .deck-visual {
   width: 42px; aspect-ratio: var(--card-ratio);

@@ -1,10 +1,12 @@
 // --- 1. 変数の定義（必ずファイルの先頭に置く） ---
 let deck = [];
 let hand = [];
-let outsideCards = []; // ★追加：場外に送ったカードのデータを保存する配列
+let outsideCards = [];
+let removedCards = [];
 let selectedHandIndex = null;
 let canMulligan = false;
-let selectedFieldSlot = null; //
+let selectedFieldSlot = null; 
+let selectedOutsideIndex = null; //
 
 // --- 2. ゲーム開始 ---
 function startGame() {
@@ -38,33 +40,49 @@ function drawCard() {
 }
 
 function moveToOutside() {
-  // A. 手札が選択されている場合
   if (selectedHandIndex !== null) {
     const card = hand.splice(selectedHandIndex, 1)[0];
     outsideCards.push(card);
     selectedHandIndex = null;
   } 
-  // B. フィールドのカードが選択されている場合
   else if (selectedFieldSlot !== null) {
-    const img = selectedFieldSlot.querySelector("img");
-    const cardData = JSON.parse(img.dataset.cardData);
-    outsideCards.push(cardData);
-    selectedFieldSlot.innerHTML = "";
+    // ★修正：スロット内のすべてのカード（img）をループで場外へ
+    const imgs = selectedFieldSlot.querySelectorAll("img");
+    imgs.forEach(img => {
+      const cardData = JSON.parse(img.dataset.cardData);
+      outsideCards.push(cardData);
+    });
+    selectedFieldSlot.innerHTML = ""; // スロットを空にする
     selectedFieldSlot.style.outline = "none";
     selectedFieldSlot = null;
   } 
-  // C. 何も選択されていない場合は中身を見る
   else {
     openOutside();
     return;
   }
-
+ 
   // UI更新
   const outside = document.getElementById("outside-area");
   outside.style.background = "rgba(0, 229, 255, 0.2)"; 
   outside.innerText = `OUTSIDE (${outsideCards.length})`;
   updateDisplay();
 }
+
+// メニューの状態をきれいにリセットする関数
+function resetActionMenu() {
+  const menu = document.getElementById("card-action-menu");
+  
+  // ライフ用に追加された画像（life-preview）があれば消す
+  const preview = menu.querySelector(".life-preview");
+  if (preview) preview.remove();
+  
+  // ライフ用に追加された「場外へ送る」ボタンがあれば消す
+  const btnOutsideLife = document.getElementById("btn-to-outside-life");
+  if (btnOutsideLife) btnOutsideLife.remove();
+  
+  return menu; // きれいになったメニューを返す
+}
+
 
 // 場外一覧を表示する
 function openOutside() {
@@ -73,77 +91,229 @@ function openOutside() {
   const modal = document.getElementById("outside-modal");
   const list = document.getElementById("outside-list");
   
-  list.innerHTML = ""; // 一旦クリア
-  outsideCards.forEach(card => {
+  list.innerHTML = ""; 
+  outsideCards.forEach((card, index) => {
     const img = document.createElement("img");
     img.src = card.image;
     img.style.width = "100%";
     img.style.borderRadius = "4px";
+    img.style.cursor = "pointer";
+
+        // カードをクリックした時の処理
+    img.onclick = (e) => {
+      e.stopPropagation(); 
+      selectedOutsideIndex = index;
+      
+      // ★追加：メニューをリセットしてから表示
+      const menu = resetActionMenu();
+      menu.style.display = "flex";
+
+      // メニューボタンに機能を割り当て
+      document.getElementById("btn-to-hand").onclick = () => moveFromOutside('hand');
+      document.getElementById("btn-to-field").onclick = () => moveFromOutside('field');
+    };
     list.appendChild(img);
   });
   
   modal.style.display = "flex";
 }
 
+
 // 確認画面を閉じる
 function closeOutside() {
   document.getElementById("outside-modal").style.display = "none";
 }
+function moveFromOutside(destination) {
+  if (selectedOutsideIndex === null) return;
+  
+  const card = outsideCards[selectedOutsideIndex];
+  document.getElementById("card-action-menu").style.display = "none";
 
-// --- 5. ライフの準備 ---
+  if (destination === 'hand') {
+    hand.push(card);
+    outsideCards.splice(selectedOutsideIndex, 1);
+  } 
+  else if (destination === 'field') {
+    const slots = document.querySelectorAll(".slot");
+    let targetSlot = Array.from(slots).find(slot => slot.children.length === 0);
+
+    if (targetSlot) {
+      const img = document.createElement("img");
+      img.src = card.image;
+      img.dataset.cardData = JSON.stringify(card);
+      img.style.pointerEvents = "none";
+      targetSlot.appendChild(img);
+      outsideCards.splice(selectedOutsideIndex, 1);
+    } else {
+      alert("空きスロットがありません");
+      return;
+    }
+  }
+
+  selectedOutsideIndex = null;
+  
+  // 場外エリアの表示更新
+  const outside = document.getElementById("outside-area");
+  if (outsideCards.length > 0) {
+    outside.innerText = `OUTSIDE (${outsideCards.length})`;
+    openOutside(); // リストを再描画して継続
+  } else {
+    outside.innerText = "OUTSIDE";
+    outside.style.background = "rgba(255, 255, 255, 0.02)";
+    closeOutside();
+  }
+  updateDisplay();
+}
+
+
+// --- 5. ライフの準備（最新版：配列管理へ変更） ---
+let currentLifeData = []; // ライフの状態を保持する変数
+
 function setupLife() {
   const lifeStack = document.getElementById("life-stack");
   lifeStack.innerHTML = "";
+  currentLifeData = []; // 初期化
+  
+  // デッキから7枚をライフ配列に移動
   for (let i = 0; i < 7; i++) {
     if (deck.length > 0) {
-      const cardData = deck.shift();
-      const card = document.createElement("div");
-      card.className = "life-card";
-      card.style.top = (i * 12) + "px";
-      card.style.zIndex = i;
-      card.onclick = () => {
-        if(confirm("手札に加えますか？")) {
-          hand.push(cardData);
-          card.remove();
-          updateDisplay();
-        }
-      };
-      lifeStack.appendChild(card);
+      currentLifeData.push(deck.shift());
     }
   }
+  renderLife();
 }
 
-// --- 6. カードを場に出す ---
+// ライフを画面に描画する専用の関数
+function renderLife() {
+  const lifeStack = document.getElementById("life-stack");
+  lifeStack.innerHTML = "";
+  
+  currentLifeData.forEach((cardData, i) => {
+    const card = document.createElement("div");
+    card.className = "life-card";
+    card.style.top = (i * 12) + "px";
+    card.style.zIndex = i;
+    
+    card.onclick = () => {
+      // ライフをクリックした時にメニューを表示
+      showLifeMenu(cardData, i);
+    };
+    lifeStack.appendChild(card);
+  });
+}
+
+
+// --- ライフ用のアクションメニューを表示（画像プレビュー＆場外ボタン付き） ---
+function showLifeMenu(cardData, index) {
+  // ★追加：メニューをリセット
+  const menu = resetActionMenu();
+  const btnHand = document.getElementById("btn-to-hand");
+  const btnField = document.getElementById("btn-to-field");
+  
+  // 1. カード画像のプレビューを表示（毎回新しく作る）
+  const previewImg = document.createElement("img");
+  previewImg.className = "life-preview";
+  previewImg.src = cardData.image;
+  previewImg.style.width = "120px";
+  previewImg.style.borderRadius = "8px";
+  previewImg.style.marginBottom = "10px";
+  previewImg.style.display = "block";
+  previewImg.style.marginLeft = "auto";
+  previewImg.style.marginRight = "auto";
+  menu.insertBefore(previewImg, menu.firstChild);
+  
+  // 2. 「場外へ」ボタンを作成（毎回新しく作る）
+  const btnOutside = document.createElement("button");
+  btnOutside.id = "btn-to-outside-life";
+  btnOutside.innerText = "場外へ送る";
+  btnOutside.style.background = "#ff4444";
+  btnOutside.style.color = "white";
+  btnOutside.style.padding = "10px";
+  btnOutside.style.marginTop = "5px";
+  btnOutside.style.border = "none";
+  btnOutside.style.borderRadius = "4px";
+  btnOutside.style.fontWeight = "bold";
+  // キャンセルボタンの上に配置
+  menu.appendChild(btnOutside);
+  
+  menu.style.display = "flex";
+
+  // 3. 各ボタンの処理を割り当て
+  btnHand.onclick = () => {
+    hand.push(cardData);
+    finalizeLifeAction(index);
+  };
+
+  btnField.onclick = () => {
+    const slots = document.querySelectorAll(".slot");
+    let targetSlot = Array.from(slots).find(slot => slot.children.length === 0);
+    if (targetSlot) {
+      const img = document.createElement("img");
+      img.src = cardData.image;
+      img.dataset.cardData = JSON.stringify(cardData);
+      img.style.pointerEvents = "none";
+      targetSlot.appendChild(img);
+      finalizeLifeAction(index);
+    } else {
+      alert("空きスロットがありません");
+    }
+  };
+
+  btnOutside.onclick = () => {
+    outsideCards.push(cardData);
+    const outsideArea = document.getElementById("outside-area");
+    outsideArea.style.background = "rgba(0, 229, 255, 0.2)";
+    outsideArea.innerText = `OUTSIDE (${outsideCards.length})`;
+    finalizeLifeAction(index);
+  };
+}
+
+// 4. ライフ処理の共通終了関数
+function finalizeLifeAction(index) {
+  currentLifeData.splice(index, 1); // ライフ配列から削除
+  document.getElementById("card-action-menu").style.display = "none";
+  renderLife(); // ライフの並びを更新
+  updateDisplay(); // 手札などのUIを更新
+}
+
+
+
+// --- 6. カードを場に出す（重ねがけ対応版） ---
 function placeCard(slot) {
-  // --- 1. 手札から場に出す ---
-  if (selectedHandIndex !== null && slot.children.length === 0) {
+  // --- 1. 手札から場に出す（または重ねる） ---
+  if (selectedHandIndex !== null) {
     const cardData = hand.splice(selectedHandIndex, 1)[0];
     const img = document.createElement("img");
     img.src = cardData.image;
     img.dataset.cardData = JSON.stringify(cardData);
-    
-    // 画像単体をクリックした時は何もしない（親のslotにイベントを任せる）
-    // その代わり、移動ではなく「レスト」だけさせたい時のために後述の処理を追加
-    img.style.pointerEvents = "none"; 
+    img.style.pointerEvents = "none";
+
+    // 重なっている枚数に応じて少し位置をずらす（スタック表現）
+    const stackCount = slot.querySelectorAll("img").length;
+    if (stackCount > 0) {
+      img.style.position = "absolute";
+      img.style.top = (stackCount * 5) + "px"; // 5pxずつ下にずらす
+      img.style.left = "0";
+      img.style.zIndex = stackCount;
+    }
 
     slot.appendChild(img);
     selectedHandIndex = null;
     canMulligan = false;
     document.getElementById("mulligan-btn").style.display = "none";
     updateDisplay();
-    return; // 処理終了
+    return;
   }
 
-  // --- 2. 場にあるカードを選択する、またはレストさせる ---
+  // --- 2. 場にあるカードを選択、またはレスト ---
   if (slot.children.length > 0) {
-    // すでに選択されているスロットをもう一度タップした場合は「レスト」
     if (selectedFieldSlot === slot) {
-      const img = slot.querySelector("img");
-      img.classList.toggle("rest");
+      // スロット内のすべての画像（重ねたカード全部）を回転させる
+      const imgs = slot.querySelectorAll("img");
+      imgs.forEach(img => img.classList.toggle("rest"));
       slot.style.outline = "none";
-      selectedFieldSlot = null; // レスト後は選択解除
+      selectedFieldSlot = null;
     } 
-    // まだ何も選択していない場合は「移動元」として選択
     else if (selectedFieldSlot === null) {
       selectedFieldSlot = slot;
       slot.style.outline = "2px solid #00e5ff";
@@ -151,23 +321,25 @@ function placeCard(slot) {
     return;
   }
 
-  // --- 3. 選択したカードを空のスロットへ移動させる ---
+  // --- 3. 選択したカード（束ごと）を空スロットへ移動 ---
   if (selectedFieldSlot !== null && slot.children.length === 0) {
-    const img = selectedFieldSlot.querySelector("img");
-    slot.appendChild(img);
+    // スロット内の子要素をすべて移動させる
+    while (selectedFieldSlot.firstChild) {
+      slot.appendChild(selectedFieldSlot.firstChild);
+    }
     selectedFieldSlot.style.outline = "none";
     selectedFieldSlot = null;
     return;
   }
 
-  // --- 4. どこでもない場所（空スロット）をタップしたら選択解除 ---
+  // 4.選択の解除
   if (selectedFieldSlot !== null) {
     selectedFieldSlot.style.outline = "none";
     selectedFieldSlot = null;
   }
 }
 
-
+ 
 // --- その他 補助機能 ---
 function mulligan() {
   if(!canMulligan) return;
@@ -263,7 +435,7 @@ function shuffle(array) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
-} // ←ここでしっかり閉じる！
+}
 
 // --- 山札確認機能 ---
 let checkingCards = [];    // 確認エリアに並んでいるカードリスト
@@ -365,3 +537,101 @@ function closeCheckArea() {
   document.getElementById("deck-check-area").style.display = "none";
   updateDisplay();
 }
+// リムーブエリアに送る関数
+function moveToRemove() {
+  let cardData = null;
+
+  // A. 手札が選択されている場合
+  if (selectedHandIndex !== null) {
+    cardData = hand.splice(selectedHandIndex, 1)[0];
+    selectedHandIndex = null;
+  } 
+  // B. フィールドのカードが選択されている場合
+  else if (selectedFieldSlot !== null) {
+    const img = selectedFieldSlot.querySelector("img");
+    cardData = JSON.parse(img.dataset.cardData);
+    selectedFieldSlot.innerHTML = "";
+    selectedFieldSlot.style.outline = "none";
+    selectedFieldSlot = null;
+  } 
+  // C. 何も選択されていない場合は中身を見る（後述の表示機能）
+  else {
+    openRemoveList();
+    return;
+  }
+
+  if (cardData) {
+    removedCards.push(cardData);
+    updateRemoveDisplay();
+    updateDisplay();
+  }
+}
+
+// リムーブエリアの見た目を更新
+function updateRemoveDisplay() {
+  const removeArea = document.querySelector(".mini-box"); // REMOVEの枠
+  if (removedCards.length > 0) {
+    removeArea.style.background = "rgba(255, 68, 68, 0.2)"; // 少し赤くする
+    removeArea.innerText = `REMOVE (${removedCards.length})`;
+  } else {
+    removeArea.style.background = "rgba(255, 255, 255, 0.02)";
+    removeArea.innerText = "REMOVE";
+  }
+}
+function openRemoveList() {
+  if (removedCards.length === 0) return alert("リムーブにカードはありません");
+  
+  const modal = document.getElementById("outside-modal");
+  const list = document.getElementById("outside-list");
+  const title = modal.querySelector("div"); // タイトル部分
+  
+  title.innerText = "リムーブカード一覧";
+  list.innerHTML = ""; 
+
+  removedCards.forEach((card, index) => {
+    const img = document.createElement("img");
+    img.src = card.image;
+    img.style.width = "100%";
+    img.style.borderRadius = "4px";
+    img.onclick = (e) => {
+      e.stopPropagation();
+      // 再利用するためにメニューを開く
+      showRemoveActionMenu(card, index);
+    };
+    list.appendChild(img);
+  });
+  modal.style.display = "flex";
+}
+
+function showRemoveActionMenu(card, index) {
+  const menu = document.getElementById("card-action-menu");
+  menu.style.display = "flex";
+
+  document.getElementById("btn-to-hand").onclick = () => {
+    hand.push(removedCards.splice(index, 1)[0]);
+    closeAndRefreshRemove();
+  };
+  document.getElementById("btn-to-field").onclick = () => {
+    // フィールドへ出す処理（既存のロジック流用）
+    const slots = document.querySelectorAll(".slot");
+    let targetSlot = Array.from(slots).find(slot => slot.children.length === 0);
+    if (targetSlot) {
+      const img = document.createElement("img");
+      img.src = card.image;
+      img.dataset.cardData = JSON.stringify(card);
+      img.style.pointerEvents = "none";
+      targetSlot.appendChild(img);
+      removedCards.splice(index, 1);
+      closeAndRefreshRemove();
+    }
+  };
+}
+
+function closeAndRefreshRemove() {
+  document.getElementById("card-action-menu").style.display = "none";
+  updateRemoveDisplay();
+  if (removedCards.length > 0) openRemoveList();
+  else closeOutside();
+  updateDisplay();
+}
+
