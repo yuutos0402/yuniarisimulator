@@ -142,16 +142,11 @@ body {
 
 /* --- 下部固定エリア（URLバー回避・最強版） --- */
 #hand-fixed {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  /* iPhoneの画面下部の余白を自動計算して避ける */
   padding-bottom: env(safe-area-inset-bottom);
-  /* さらにツールバーと被らないよう、少し上に余裕を持たせる */
-  padding-bottom: calc(20px + env(safe-area-inset-bottom));
-  
-  box-sizing: border-box;
-  /* paddingを含めてサイズ計算させるために必要 */
+  background: #000;
+  border-top: 2px solid #222;
+  /* 端末のセーフエリア + 35px の余裕を追加 */
+  padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 35px); 
 }
 
 #hand {
