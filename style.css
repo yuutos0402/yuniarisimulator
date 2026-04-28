@@ -128,12 +128,29 @@ html, body {
 }
 
 #hand {
-  display: flex; overflow-x: auto; padding: 10px 5px;
-  gap: 6px; height: 85px;
+  display: flex;
+  align-items: center; 
+  overflow-x: auto;
+  padding: 10px 5px;
+  gap: 6px;
+  height: 100px; 
+  flex-shrink: 0;
+  -webkit-overflow-scrolling: touch; 
 }
 
-#hand img { width: 60px; aspect-ratio: var(--card-ratio); border-radius: 4px; flex-shrink: 0; }
-#hand img.selected { outline: 2px solid var(--accent); transform: translateY(-5px); }
+#hand img {
+  width: 60px;
+  height: 84px; /* 60px * (3.5 / 2.5) の計算値：固定値を指定して崩れを防ぐ */
+  aspect-ratio: 2.5 / 3.5; /* アスペクト比も念のため指定 */
+  border-radius: 4px;
+  flex-shrink: 0; /* ★ここが重要：横並びの際に画像が縮むのを防ぐ */
+  object-fit: cover; /* 画像が歪まないようにする */
+}
+
+#hand img.selected {
+  outline: 2px solid var(--accent);
+  transform: translateY(-5px);
+}
 
 .controls {
   display: flex; justify-content: space-around; 
