@@ -1,30 +1,36 @@
-/* すべての要素でダブルタップズームを禁止する */
+/* --- 1. グローバル設定（ズーム・挙動の最適化） --- */
 * {
   touch-action: manipulation;
+  box-sizing: border-box; /* サイズ計算を楽にするため追加 */
 }
+
 :root {
   --bg: #0a0a0a;
   --accent: #00e5ff;
   --card-ratio: 2.5 / 3.5;
 }
 
-body {
+html, body {
   margin: 0; padding: 0;
+  width: 100%;
+  height: 100dvh; /* ★100vhを100dvhに変更：SafariのURLバー変動に対応 */
   background-color: var(--bg);
   color: white; font-family: sans-serif;
-  overflow: hidden; height: 100vh;
-  display: flex; flex-direction: column;
+  overflow: hidden; /* 画面全体が意図せずスクロールするのを防ぐ */
+  overscroll-behavior: none; /* iOS特有のバウンス（ゴム跳ね）を防止 */
+  display: flex; 
+  flex-direction: column;
 }
 
-/* --- メイン盤面 --- */
+/* --- 2. メイン盤面（ここから先はあなたのコードを維持） --- */
 #game-board {
-  flex: 1;
+  flex: 1; /* 手札以外の残りのスペースを全部埋める */
   display: flex;
   flex-direction: column;
   padding: 5px;
-  box-sizing: border-box;
   justify-content: center; 
-  gap: 2px; /* 全体的に少し詰め気味にしてスペースを捻出 */
+  gap: 2px;
+  overflow-y: auto; /* 盤面が狭い時にスクロールできるようにする */
 }
 
 /* 上段：ライフ・フィールド・デッキ */
@@ -35,10 +41,7 @@ body {
   align-items: center;
 }
 
-.side-column {
-  display: flex; flex-direction: column; align-items: center;
-}
-
+.side-column { display: flex; flex-direction: column; align-items: center; }
 .label { font-size: 8px; color: #666; margin-bottom: 2px; }
 
 #life-stack { position: relative; width: 100%; height: 100px; }
@@ -48,57 +51,35 @@ body {
   border: 1px solid #fff; border-radius: 2px;
 }
 
-.center-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px; 
-}
-
+.center-field { display: flex; flex-direction: column; gap: 6px; }
 .line-group { width: 100%; }
 .line-label { font-size: 8px; color: #444; text-align: center; margin-bottom: 2px; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
 
-/* --- フィールドのスロット設定（重ねがけ対応版） --- */
+/* フィールドのスロット */
 .slot {
   aspect-ratio: var(--card-ratio); 
   border: 1px solid #2a2a2a;
   background: rgba(255,255,255,0.03); 
   border-radius: 4px; 
-  
-  /* 重要：子要素（カード画像）の配置基準にする */
   position: relative; 
-  /* 重要：重ねてずらしたカードが枠外にはみ出しても見えるようにする */
   overflow: visible; 
 }
 
 .slot img { 
-  /* 重要：枠の左上に固定して重ねられるようにする */
-  position: absolute;
-  top: 0;
-  left: 0;
-  
-  width: 100%; 
-  height: 100%; 
-  object-fit: cover; 
-  border-radius: 4px;
-  
-  /* 重なりの重なり順や動きをスムーズに */
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%; 
+  object-fit: cover; border-radius: 4px;
   transition: transform 0.2s, top 0.2s;
   box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
-/* レスト状態：重ねた状態でも回転が見えやすいように調整 */
 .slot img.rest { 
-  /* 少し小さくして回転させることで、隣の枠との干渉を防ぐ */
   transform: rotate(90deg) scale(0.85); 
   z-index: 100; 
 }
 
-/* 重なった下のカードを少し暗く見せたい場合は追加（任意） */
-.slot img:not(:last-child) {
-  filter: brightness(0.7);
-}
-
+.slot img:not(:last-child) { filter: brightness(0.7); }
 
 .deck-visual {
   width: 42px; aspect-ratio: var(--card-ratio);
@@ -106,7 +87,7 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 
-/* --- 中段：AP・リムーブ・場外 --- */
+/* 中段：AP・リムーブ・場外 */
 .middle-row {
   display: grid;
   grid-template-columns: 60px 1fr 60px;
@@ -121,8 +102,7 @@ body {
   background: rgba(255, 255, 255, 0.02);
   font-size: 7px; color: #444;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 4px;
-  overflow: hidden;
+  border-radius: 4px; overflow: hidden;
 }
 
 #ap-area {
@@ -136,17 +116,15 @@ body {
   border: 1px solid #fff; border-radius: 3px;
 }
 
-.ap-card.used {
-  background: #1a1a1a; border-color: #333; opacity: 0.2;
-}
+.ap-card.used { background: #1a1a1a; border-color: #333; opacity: 0.2; }
 
-/* --- 下部固定エリア（URLバー回避・最強版） --- */
+/* --- 3. 下部固定エリア（Safari対策済み） --- */
 #hand-fixed {
-  padding-bottom: env(safe-area-inset-bottom);
   background: #000;
   border-top: 2px solid #222;
-  /* 端末のセーフエリア + 35px の余裕を追加 */
-  padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 35px); 
+  /* iPhoneのホームインジケータ分だけ余白をとる */
+  padding-bottom: env(safe-area-inset-bottom, 20px); 
+  flex-shrink: 0; /* 高さを維持 */
 }
 
 #hand {
@@ -159,28 +137,23 @@ body {
 
 .controls {
   display: flex; justify-content: space-around; 
-  padding: 10px 5px;
-  background: #080808;
+  padding: 10px 5px; background: #080808;
 }
 
-/* 修正後：style.css の button 部分 */
 button {
   background: #222; color: #ccc; border: 1px solid #333;
-  padding: 10px 2px; /* 左右パディングを少し削る */
-  font-size: 10px;   /* 5つ並ぶので少し小さめに調整 */
+  padding: 10px 2px;
+  font-size: 10px;
   border-radius: 4px;
   flex: 1; margin: 0 2px;
   box-shadow: 0 3px 0 #000;
   white-space: nowrap; 
-  }/* 文字の折り返しを防止 */
-/* style.css に追加 */
+}
+
 #outside-area {
   cursor: pointer;
   transition: background 0.3s;
   border: 1px solid #444;
 }
 
-#outside-area:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #eee;
-}
+#outside-area:hover { background: rgba(255, 255, 255, 0.1); color: #eee; }
