@@ -332,6 +332,14 @@
   "image": "images/sololeveling3/4taiga.png"
 },
 {
+  "id": "SLG051",
+  "name": "観月絵里",
+  "bp": 2000,
+  "type": "character",
+  "category": "sololeveling3",
+  "image": "images/sololeveling3/3mizuki.png"
+},
+{
   "id": "SLG071",
   "name": "マリー",
   "bp": 1500,
@@ -383,6 +391,14 @@
   "type": "character",
   "category": "sololeveling4",
   "image": "images/sololeveling4/4kana.png"
+},
+{
+  "id": "SLG070",
+  "name": "シーマ",
+  "bp": 1000,
+  "type": "character",
+  "category": "sololeveling4",
+  "image": "images/sololeveling4/0sima.png"
 },
 {
   "id": "SLG072",
