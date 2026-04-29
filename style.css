@@ -132,6 +132,8 @@ html, body {
   align-items: center; 
   overflow-x: auto;
   overflow-y: hidden;
+  touch-action: pan-x;
+  overscroll-behavior-y: contain;
   padding: 10px 5px;
   gap: 6px;
   height: 100px; 
@@ -142,10 +144,10 @@ html, body {
 #hand img {
   width: 60px;
   height: 84px; /* 60px * (3.5 / 2.5) の計算値：固定値を指定して崩れを防ぐ */
-  aspect-ratio: 2.5 / 3.5; /* アスペクト比も念のため指定 */
+  aspect-ratio: 2.5 / 3.5; 
   border-radius: 4px;
-  flex-shrink: 0; /* ★ここが重要：横並びの際に画像が縮むのを防ぐ */
-  object-fit: cover; /* 画像が歪まないようにする */
+  flex-shrink: 0; 
+  object-fit: cover; 
 }
 
 #hand img.selected {
