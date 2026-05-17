@@ -1,4 +1,113 @@
 [
+{
+  "id": "csm47",
+  "name": "デンジ",
+  "bp": 4000,
+  "type": "character",
+  "category": "man",
+  "image": "images/man/csm47.png"
+},
+{
+  "id": "csm48",
+  "name": "デンジ",
+  "bp": 5000,
+  "type": "character",
+  "category": "man",
+  "image": "images/man/csm48.png"
+},
+{
+  "id": "csm49",
+  "name": "デンジ",
+  "bp": 1000,
+  "type": "character",
+  "category": "man",
+  "image": "images/man/csm49.png"
+},
+{
+  "id": "csm50",
+  "name": "デンジ",
+  "bp": 2000,
+  "type": "character",
+  "category": "man",
+  "image": "images/man/csm50.png"
+},
+{
+  "id": "csm51",
+  "name": "デンジ",
+  "bp": 3000,
+  "type": "character",
+  "category": "man",
+  "image": "images/man/csm51.png"
+},
+{
+  "id": "csm57",
+  "name": "パワー",
+  "bp": 1000,
+  "type": "character",
+  "category": "man",
+  "image": "images/man/csm57.png"
+},
+{
+  "id": "csm59",
+  "name": "パワー",
+  "bp": 3000,
+  "type": "character",
+  "category": "man",
+  "image": "images/man/csm59.png"
+},
+{
+  "id": "csm60",
+  "name": "パワー",
+  "bp": 2500,
+  "type": "character",
+  "category": "man",
+  "image": "images/man/csm60.png"
+},
+{
+  "id": "csm61",
+  "name": "パワー",
+  "bp": 4000,
+  "type": "character",
+  "category": "man",
+  "image": "images/man/csm61.png"
+},
+{
+  "id": "csm67",
+  "name": "ポチタ",
+  "bp": 500,
+  "type": "character",
+  "category": "man",
+  "image": "images/man/csm67.png"
+},
+{
+  "id": "csm70",
+  "name": "マキマ",
+  "bp": 4000,
+  "type": "character",
+  "category": "man",
+  "image": "images/man/csm70.png"
+},
+ {
+   "id": "csm76",
+   "name": "私に見せてくれ",
+   "type": "event",
+   "category": "man",
+   "image": "images/man/csm76.png"
+ },
+ {
+   "id": "csm79",
+   "name": "約束じゃったじゃろ",
+   "type": "event",
+   "category": "man",
+   "image": "images/man/csm79.png"
+ },
+ {
+   "id": "csm80",
+   "name": "好きだぜ",
+   "type": "event",
+   "category": "man",
+   "image": "images/man/csm80.png"
+ },
  {
   "id":"SLG030",
   "name":"影の軍団",
